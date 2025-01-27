@@ -1,0 +1,25 @@
+
+services:
+  rest-api:
+    build:
+      context: ../ 
+      dockerfile: api.dockerfile
+      args:
+        - USERNAME=non-root
+        - USER_UID=1000
+        - ENVIRONMENT=${ENVIRONMENT:?-ENVIRONMENT is required}
+    
+    image: yumlytics-restapi-${ENVIRONMENT}-${USER:-user}:${IMAGE_VERSION:-latest}
+    
+    ports:
+      - ${API_PORT}:${API_PORT}
+
+    volumes:
+      - log_dir:/home/non-root/app/src/log:rw
+
+    entrypoint: /bin/bash src/api/prestart.${ENVIRONMENT}.sh
+    
+volumes:
+  log_dir:
+    name: yumlytics_logs
+    driver: local

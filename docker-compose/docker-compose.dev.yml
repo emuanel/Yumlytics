@@ -1,0 +1,15 @@
+
+services:
+  rest-api:
+    container_name: yumlytics_restapi_dev_${USER:-user}
+
+    env_file:
+      - ../envs/.env.dev
+
+    user: root
+    
+    volumes:
+      - ../src:/home/non-root/app/src
+      
+    stdin_open: true
+    tty: true

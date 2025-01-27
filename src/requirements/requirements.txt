@@ -1,0 +1,8 @@
+fastapi
+gunicorn
+pydantic
+pydantic_settings
+python-dotenv
+python-multipart
+uvicorn
+tabulate
