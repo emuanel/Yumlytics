@@ -8,17 +8,81 @@ services:
         - USERNAME=non-root
         - USER_UID=1000
         - ENVIRONMENT=${ENVIRONMENT:?-ENVIRONMENT is required}
-    
+    working_dir: /home/non-root/app/src/api
     image: yumlytics-restapi-${ENVIRONMENT}-${USER:-user}:${IMAGE_VERSION:-latest}
-    
     ports:
       - ${API_PORT}:${API_PORT}
-
     volumes:
       - log_dir:/home/non-root/app/src/log:rw
+    entrypoint: /bin/bash prestart.${ENVIRONMENT}.sh
+    networks:
+      - private
+      
+  redis:
+    image: redis # redis/redis-stack redis/redis-stack-server
+    container_name: yumlytics_redis_${ENVIRONMENT}_${USER:-user}
+    user: redis
+    ports:
+      - ${REDIS_PORT}:${REDIS_PORT}
+    networks:
+      - private
 
-    entrypoint: /bin/bash src/api/prestart.${ENVIRONMENT}.sh
-    
+  celery:
+    build:
+      context: ../ 
+      dockerfile: celery.dockerfile
+      args:
+        - USERNAME=non-root
+        - USER_UID=1000
+        - ENVIRONMENT=${ENVIRONMENT:?-ENVIRONMENT is required}
+    working_dir: /home/non-root/app/src/celery_worker
+    container_name: yumlytics_celery_worker_${ENVIRONMENT}_${USER:-user}
+    image: yumlytics-celery-worker-${ENVIRONMENT}-${USER:-user}:${IMAGE_VERSION:-latest}
+    depends_on:
+      - redis
+      - rest-api
+    volumes:
+      - log_dir:/home/non-root/app/src/log:rw
+    entrypoint: /bin/bash prestart.${ENVIRONMENT}.sh
+    networks:
+      - private
+
+  flower:
+    image: mher/flower
+    container_name: yumlytics_flower_${ENVIRONMENT}_${USER:-user}
+    command: celery flower --basic-auth="${FLOWER_USER:-user}:${FLOWER_PASSWORD}"
+    ports:
+      - ${FLOWER_PORT}:${FLOWER_PORT}
+    environment:
+      CELERY_BROKER_URL: redis://redis
+      CELERY_RESULT_BACKEND: redis://redis
+    depends_on:
+      - celery
+      - redis
+    networks:
+      - private
+
+  nginx:
+    image: nginx-${ENVIRONMENT}-${USER:-user}:${IMAGE_VERSION:-latest}
+    container_name: yumlytics_nginx_${ENVIRONMENT}_${USER:-user}
+    build:
+      context: ../ 
+      dockerfile: nginx.dockerfile
+    ports:
+      - ${NGINX_HTTP_PORT}:${NGINX_HTTP_PORT}
+    depends_on:
+      - rest-api
+    networks:
+      - private
+      - public
+
+networks:
+  public:
+    external: true
+
+  private:
+    external: false
+
 volumes:
   log_dir:
     name: yumlytics_logs

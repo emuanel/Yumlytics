@@ -1,0 +1,1 @@
+from .video_analysis import router as video_analysis_router  # noqa

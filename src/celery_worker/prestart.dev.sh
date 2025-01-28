@@ -5,4 +5,4 @@ set -o errexit
 # exits if any of your variables is not set
 set -o nounset
 
-exec python3 main.py
+watchmedo auto-restart --patterns="*.py;*.txt" --recursive -- celery -A celery_app worker --loglevel=${LOG_LEVEL:-INFO}

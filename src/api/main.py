@@ -5,8 +5,8 @@ import uvicorn
 from config import settings
 from fastapi import APIRouter, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import health_router
 
+from routes import health_router, video_analysis_router
 
 logging.basicConfig(
     level=settings.logging.parsed_log_level,
@@ -40,6 +40,7 @@ logger.info("CORS middleware configured successfully")
 api_router = APIRouter()
 
 api_router.include_router(health_router, prefix="/health", tags=["health"])
+api_router.include_router(video_analysis_router, prefix="/video_analysis", tags=["video_analysis"])
 
 app.include_router(api_router)
 

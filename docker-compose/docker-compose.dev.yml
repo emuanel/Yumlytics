@@ -9,7 +9,26 @@ services:
     user: root
     
     volumes:
-      - ../src:/home/non-root/app/src
+      - ../src/api:/home/non-root/app/src/api
+      - ../src/shared_scripts/schema:/home/non-root/app/src/api/schema
       
     stdin_open: true
     tty: true
+
+  celery:
+    env_file:
+      - ../envs/.env.dev
+    volumes:
+        - ../src/celery_worker:/home/non-root/app/src/celery_worker
+        - ../src/shared_scripts/schema:/home/non-root/app/src/celery_worker/schema
+    stdin_open: true
+    tty: true
+    user: root
+
+  flower:
+    env_file:
+      - ../envs/.env.dev
+
+  nginx:
+    volumes:
+      - ../src/nginx/nginx.conf:/etc/nginx/conf.d/default.conf

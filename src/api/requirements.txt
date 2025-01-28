@@ -1,8 +1,12 @@
+celery
 fastapi
 gunicorn
 pydantic
 pydantic_settings
 python-dotenv
 python-multipart
+redis
+requests
+starlette
 uvicorn
 tabulate

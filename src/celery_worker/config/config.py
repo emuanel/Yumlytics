@@ -4,36 +4,23 @@ from .logging import Settings as LoggingSettings
 
 
 class Settings(BaseSettings):
-    # Application settings
-    app_name: str
-    api_port: int
-    host: str
-    app_run_name: str
-    origins: list[str]
-
-    logging: LoggingSettings = LoggingSettings()
-
     celery_name: str
+    celery_workers: int
+    return_mock_parsed_schema: bool
 
     redis_port: str
     redis_service: str
-
-    flower_port: str
     flower_service: str
-    flower_user: str
-    flower_password: str
+
+    logging: LoggingSettings = LoggingSettings()
 
     @property
     def celery_broker_url(self) -> str:
         return f"{self.redis_service}://{self.redis_service}:{self.redis_port}/0"
 
     @property
-    def flower_url(self) -> str:
-        return f"http://{self.flower_service}:{self.flower_port}"
-
-    @property
     def celery_backend_url(self) -> str:
         return self.celery_broker_url
 
 
-settings = Settings()  # type: ignore
+settings = Settings()

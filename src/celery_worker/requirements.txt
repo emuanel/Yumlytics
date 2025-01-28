@@ -1,0 +1,7 @@
+celery
+fastapi
+openai
+pydantic
+pydantic_settings
+redis
+watchdog[watchmedo]
